@@ -136,7 +136,7 @@ void transTime(const uint8_t *charData, uint8_t *i2cData) {
 			bcdMS = seg / 10;
 			seg = bcdMS << 4;
 			seg |= bcdLS;
-			seg |= 0x80;
+			seg = seg & 0x7F;
 		} else {
 			seg = 0x80;
 		}
