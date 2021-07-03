@@ -1,18 +1,21 @@
 /*** INCLUDED LIBRARIES ***/
 // MAIN LIBRARIES
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "clock_config.h"
 #include "terminal.h"
 #include "ds1307.h"
+#include "board.h"
 
 
 // UART LIBRARIES
-#include "board.h"
 #include "peripherals.h"
 #include "pin_mux.h"
 #include "fsl_debug_console.h"
 
+#define TIME_PCKG 0
+#define DATE_PCKG 1
 
 typedef enum {mainMenu, configTime, configDate, readTime, readDate} menu_state_t;
 
@@ -29,11 +32,7 @@ int main(void) {
 	/*** PERIPHERALS CONFIG ***/
 	UART0_Config(UART_BAUDRATE);
 	I2C0_Config(I2C_BAUDRATE);
-	//BOARD_InitDebugConsole();
-
-
-	/*** I2C0 SETTINGS ***/
-	status_t status_i2c;
+	BOARD_InitDebugConsole();
 
 
 	/*** INIT SYSTEM VARIABLES ***/
@@ -50,8 +49,11 @@ int main(void) {
 	menu_state_t menuCurrentState;
 	bool selectEnable = false;
 	bool configLoopFlag = true;
+
 	uint8_t timeArray[8] = { 0 };
 	uint8_t dateArray[8] = { 0 };
+	status_t status_i2c;
+	//uint8_t I2C_master_txBuff[DS1307_DATA_LENGTH] = { 0x80, 0x22, 0x11, 0x00, 0x12, 0x06, 0x21 };
 
 	while (1) {
 		if ((newMenu) && (getUartIRQState() == menuInput)) {
@@ -96,6 +98,7 @@ int main(void) {
 						printFromRingBuffer();
 					}
 				}
+				status_i2c = sentPackageI2C(TIME_PCKG, timeArray);
 				UART_WriteBlocking(UART0, strTimeDone, sizeof(strTimeDone) / sizeof(strTimeDone[0]));
 				clearIndex ();
 				setUartIRQState (escInput);
@@ -119,6 +122,7 @@ int main(void) {
 						printFromRingBuffer();
 					}
 				}
+				status_i2c = sentPackageI2C(DATE_PCKG, dateArray);
 				UART_WriteBlocking(UART0, strDateDone, sizeof(strDateDone) / sizeof(strDateDone[0]));
 				clearIndex ();
 				setUartIRQState (escInput);

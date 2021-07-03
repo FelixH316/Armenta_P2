@@ -43,7 +43,7 @@ bool I2C0_Init(uint8_t port, uint8_t sdaPin, uint8_t clkPin) {
 
 void I2C0_Config(uint32_t baudrate){
 	i2c_master_config_t I2CmasterConfig;
-	i2c_master_transfer_t masterXfer;
+
 	/*
 	 * masterConfig->baudRate_Bps = 100000U;
 	 * masterConfig->enableStopHold = false;
@@ -53,5 +53,5 @@ void I2C0_Config(uint32_t baudrate){
 	I2C_MasterGetDefaultConfig(&I2CmasterConfig);
 	I2CmasterConfig.baudRate_Bps = baudrate;
 	I2C_MasterInit(I2C0, &I2CmasterConfig, CLOCK_GetFreq(I2C0_CLK_SRC));
-	memset(&masterXfer, 0, sizeof(masterXfer));
+
 }
