@@ -7,7 +7,7 @@
 #include "terminal.h"
 #include "ds1307.h"
 #include "board.h"
-
+#include "pit.h"
 
 // UART LIBRARIES
 #include "peripherals.h"
@@ -18,6 +18,7 @@
 #define DATE_PCKG 1U
 #define MENU 1U
 #define NOTMENU 0U
+#define US_UPDATE_TIME 1000000U
 
 typedef enum {mainMenu, configTime, configDate, readTime, readDate} menu_state_t;
 
@@ -25,6 +26,8 @@ int main(void) {
 	/*** PERIPHERALS INIT ***/
 	UART0_Init(UART0_PORT, UART0_TX, UART0_RX);
 	I2C0_Init(I2C0_PORT, I2C0_SDA, I2C0_SCL);
+	initPIT();
+	setPeriodPitCh3(US_UPDATE_TIME);
 
 
 	/*** SYSTEM CLOCK & BUS CLOCK CONFIG ***/
@@ -46,6 +49,7 @@ int main(void) {
 	const uint8_t strDateDone[] = "\n\r\tSe ha configurado la fecha";
 	const uint8_t strTimeTitle[] = "\n\n\r\tLa hora actual es:\n\r\t-> ";
 	const uint8_t strDateTitle[] = "\n\n\r\tLa fecha actual es:\n\r\t-> ";
+	const uint8_t strFormat[] = "\n\r\t-> ";
 
 	bool newMenu = 1;
 	menu_state_t menuCurrentState;
@@ -142,6 +146,12 @@ int main(void) {
 				status_i2c = receivePackageI2C(TIME_PCKG, timeRead);
 				UART_WriteBlocking(UART0, timeRead, sizeof(timeRead) / sizeof(timeRead[0]));
 				while (!getEscFlag()) {
+					if (getPitCh3Flag()){
+						UART_WriteBlocking(UART0, strFormat, sizeof(strFormat) / sizeof(strFormat[0]));
+						status_i2c = receivePackageI2C(TIME_PCKG, timeRead);
+						UART_WriteBlocking(UART0, timeRead, sizeof(timeRead) / sizeof(timeRead[0]));
+						clearPitCh3Flag();
+					}
 				}
 				setEscFlag(false);
 				configLoopFlag = true;
