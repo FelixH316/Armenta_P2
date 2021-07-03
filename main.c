@@ -52,6 +52,8 @@ int main(void) {
 
 	uint8_t timeArray[8] = { 0 };
 	uint8_t dateArray[8] = { 0 };
+	uint8_t timeRead[8] = { 0 };
+	uint8_t dateRead[8] = { 0 };
 	status_t status_i2c;
 	//uint8_t I2C_master_txBuff[DS1307_DATA_LENGTH] = { 0x80, 0x22, 0x11, 0x00, 0x12, 0x06, 0x21 };
 
@@ -135,13 +137,25 @@ int main(void) {
 				break;
 			case readTime:
 				UART_WriteBlocking(UART0, strTimeTitle, sizeof(strTimeTitle) / sizeof(strTimeTitle[0]));
-				status_i2c = receivePackageI2C(TIME_PCKG, timeArray);
-				UART_WriteBlocking(UART0, timeArray, sizeof(timeArray) / sizeof(timeArray[0]));
+				status_i2c = receivePackageI2C(TIME_PCKG, timeRead);
+				UART_WriteBlocking(UART0, timeRead, sizeof(timeRead) / sizeof(timeRead[0]));
+				while (!getEscFlag()) {
+				}
+				setEscFlag(false);
+				configLoopFlag = true;
+				menuCurrentState = mainMenu;
+				setUartIRQState (menuInput);
 				break;
 			case readDate:
 				UART_WriteBlocking(UART0, strDateTitle, sizeof(strDateTitle) / sizeof(strDateTitle[0]));
-				status_i2c = receivePackageI2C(DATE_PCKG, dateArray);
-				UART_WriteBlocking(UART0, dateArray, sizeof(dateArray) / sizeof(dateArray[0]));
+				status_i2c = receivePackageI2C(DATE_PCKG, dateRead);
+				UART_WriteBlocking(UART0, dateRead, sizeof(dateRead) / sizeof(dateRead[0]));
+				while (!getEscFlag()) {
+				}
+				setEscFlag(false);
+				configLoopFlag = true;
+				menuCurrentState = mainMenu;
+				setUartIRQState (menuInput);
 				break;
 			default:
 				UART_WriteByte(UART0, 'D');

@@ -69,35 +69,49 @@ status_t receivePackageI2C(bool timeDateSel, uint8_t *dataArray){
 
 void timeBack2Char (uint8_t *mainData, uint8_t *i2cData){
 	uint8_t seg = 0, min = 0, hr = 0;
+	uint8_t bcdLS = 0, bcdMS = 0;
 	seg = i2cData[0];
 	min = i2cData[1];
 	hr = i2cData[2];
 
-	mainData[0] = (hr / 10) + 48;
-	mainData[1] = (hr % 10) + 48;
+	bcdLS = hr & 0xF;
+	bcdMS = hr >> 4;
+	mainData[0] = bcdMS + 48;
+	mainData[1] = bcdLS + 48;
 	mainData[2] = (uint8_t) ':';
-	mainData[3] = (min / 10) + 48;
-	mainData[4] = (min % 10) + 48;
+	bcdLS = min & 0xF;
+	bcdMS = min >> 4;
+	mainData[3] = bcdMS + 48;
+	mainData[4] = bcdLS + 48;
 	mainData[5] = (uint8_t) ':';
 	seg &= 0x7F;
-	mainData[6] = (seg / 10) + 48;
-	mainData[7] = (seg % 10) + 48;
+	bcdLS = seg & 0xF;
+	bcdMS = seg >> 4;
+	mainData[6] = bcdMS + 48;
+	mainData[7] = bcdLS + 48;
 }
 
 void dateBack2Char (uint8_t *mainData, uint8_t *i2cData){
 	uint8_t year = 0, month = 0, day = 0;
+	uint8_t bcdLS = 0, bcdMS = 0;
 	day = i2cData[0];
 	month = i2cData[1];
 	year = i2cData[2];
 
-	mainData[0] = (day / 10) + 48;
-	mainData[1] = (day % 10) + 48;
+	bcdLS = day & 0xF;
+	bcdMS = day >> 4;
+	mainData[0] = bcdMS + 48;
+	mainData[1] = bcdLS + 48;
 	mainData[2] = (uint8_t) '/';
-	mainData[3] = (month / 10) + 48;
-	mainData[4] = (month % 10) + 48;
+	bcdLS = month & 0xF;
+	bcdMS = month >> 4;
+	mainData[3] = bcdMS + 48;
+	mainData[4] = bcdLS + 48;
 	mainData[5] = (uint8_t) '/';
-	mainData[6] = (year / 10) + 48;
-	mainData[7] = (year % 10) + 48;
+	bcdLS = year & 0xF;
+	bcdMS = year >> 4;
+	mainData[6] = bcdMS + 48;
+	mainData[7] = bcdLS + 48;
 }
 
 void transTime(const uint8_t *charData, uint8_t *i2cData) {
