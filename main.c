@@ -14,8 +14,10 @@
 #include "pin_mux.h"
 #include "fsl_debug_console.h"
 
-#define TIME_PCKG 0
-#define DATE_PCKG 1
+#define TIME_PCKG 0U
+#define DATE_PCKG 1U
+#define MENU 1U
+#define NOTMENU 0U
 
 typedef enum {mainMenu, configTime, configDate, readTime, readDate} menu_state_t;
 
@@ -81,7 +83,7 @@ int main(void) {
 			cleanMenuInputs(&selectEnable);
 		}
 		if ((kUART_TxDataRegEmptyFlag & UART_GetStatusFlags(UART0)) && (diffIndex())) {
-			printFromRingBuffer();
+			printFromRingBuffer(MENU);
 		}
 
 		if (selectEnable) {
@@ -97,7 +99,7 @@ int main(void) {
 					}
 					/* Send data only when UART TX register is empty and ring buffer has data to send out. */
 					else if ((kUART_TxDataRegEmptyFlag & UART_GetStatusFlags(UART0)) && (diffIndex())) {
-						printFromRingBuffer();
+						printFromRingBuffer(NOTMENU);
 					}
 				}
 				status_i2c = sentPackageI2C(TIME_PCKG, timeArray);
@@ -121,7 +123,7 @@ int main(void) {
 					}
 					/* Send data only when UART TX register is empty and ring buffer has data to send out. */
 					else if ((kUART_TxDataRegEmptyFlag & UART_GetStatusFlags(UART0)) && (diffIndex())) {
-						printFromRingBuffer();
+						printFromRingBuffer(NOTMENU);
 					}
 				}
 				status_i2c = sentPackageI2C(DATE_PCKG, dateArray);

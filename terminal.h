@@ -39,7 +39,7 @@ bool getEscFlag(void);
 void setEscFlag(bool val);
 void saveArray (uint8_t* array);
 bool diffIndex (void);
-void printFromRingBuffer (void);
+void printFromRingBuffer (bool menuFlag);
 void clearIndex (void);
 
 #endif /* TERMINAL_H_ */

@@ -115,10 +115,24 @@ bool diffIndex (void){
 	}
 }
 
-void printFromRingBuffer (void){
-	UART_WriteByte(UART0, UartRingBuffer[txIndex]);
-	txIndex++;
-	txIndex %= RING_BUFFER_SIZE;
+void printFromRingBuffer (bool menuFlag){
+	if (menuFlag){
+		uint8_t val = UartRingBuffer[txIndex];
+		if ((val > 48) && (val < 53)){
+			UART_WriteByte(UART0, UartRingBuffer[txIndex]);
+			txIndex++;
+			txIndex %= RING_BUFFER_SIZE;
+		}
+		else{
+			txIndex++;
+			txIndex %= RING_BUFFER_SIZE;
+		}
+	}
+	else{
+		UART_WriteByte(UART0, UartRingBuffer[txIndex]);
+		txIndex++;
+		txIndex %= RING_BUFFER_SIZE;
+	}
 }
 
 void clearIndex (void){
