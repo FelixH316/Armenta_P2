@@ -42,7 +42,4 @@ bool diffIndex (void);
 void printFromRingBuffer (void);
 void clearIndex (void);
 
-
-
-
 #endif /* TERMINAL_H_ */

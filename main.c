@@ -42,8 +42,8 @@ int main(void) {
 	const uint8_t strTimeDone[] = "\n\r\tSe ha configurado la hora";
 	const uint8_t strDateInst[] = "\n\n\r\tIntroducir la fecha actual con el formato dd/mm/aa:\n\r\t-> ";
 	const uint8_t strDateDone[] = "\n\r\tSe ha configurado la fecha";
-	const uint8_t string3[] = "\n\n\r\tLa hora actual es:\n\r\t-> ";
-	const uint8_t string4[] = "\n\n\r\tLa fecha actual es:\n\r\t-> ";
+	const uint8_t strTimeTitle[] = "\n\n\r\tLa hora actual es:\n\r\t-> ";
+	const uint8_t strDateTitle[] = "\n\n\r\tLa fecha actual es:\n\r\t-> ";
 
 	bool newMenu = 1;
 	menu_state_t menuCurrentState;
@@ -134,10 +134,14 @@ int main(void) {
 				setUartIRQState (menuInput);
 				break;
 			case readTime:
-				UART_WriteBlocking(UART0, string3, sizeof(string3) / sizeof(string3[0]));
+				UART_WriteBlocking(UART0, strTimeTitle, sizeof(strTimeTitle) / sizeof(strTimeTitle[0]));
+				status_i2c = receivePackageI2C(TIME_PCKG, timeArray);
+				UART_WriteBlocking(UART0, timeArray, sizeof(timeArray) / sizeof(timeArray[0]));
 				break;
 			case readDate:
-				UART_WriteBlocking(UART0, string4, sizeof(string4) / sizeof(string4[0]));
+				UART_WriteBlocking(UART0, strDateTitle, sizeof(strDateTitle) / sizeof(strDateTitle[0]));
+				status_i2c = receivePackageI2C(DATE_PCKG, dateArray);
+				UART_WriteBlocking(UART0, dateArray, sizeof(dateArray) / sizeof(dateArray[0]));
 				break;
 			default:
 				UART_WriteByte(UART0, 'D');

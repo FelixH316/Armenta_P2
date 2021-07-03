@@ -37,7 +37,67 @@ status_t sentPackageI2C(bool timeDateSel, const uint8_t *dataArray) {
 	masterXfer.flags = kI2C_TransferDefaultFlag;
 
 	statusValue = I2C_MasterTransferBlocking(I2C0, &masterXfer);
+	// Wait for the slave to process the data
+	for (uint32_t i = 0U; i < WAIT_TIME; i++)
+	{
+		__NOP();
+	}
 	return statusValue;
+}
+
+status_t receivePackageI2C(bool timeDateSel, uint8_t *dataArray){
+	status_t statusValue;
+	uint8_t rxBuffer[DS1307_DATA_LENGTH] = { 0 };
+	i2c_master_transfer_t masterXfer;
+	memset(&masterXfer, 0, sizeof(masterXfer));
+
+	(!timeDateSel) ? (masterXfer.subaddress = (uint32_t) DS1307_TIME_WADDR) : (masterXfer.subaddress = (uint32_t) DS1307_DATE_WADDR);
+
+	masterXfer.slaveAddress = DS1307_SLAVE_ADDR_7BIT;
+	masterXfer.direction = kI2C_Read;
+	masterXfer.subaddressSize = 1;
+	masterXfer.data = rxBuffer;
+	masterXfer.dataSize = DS1307_DATA_LENGTH;
+	masterXfer.flags = kI2C_TransferDefaultFlag;
+
+	statusValue = I2C_MasterTransferBlocking(I2C0, &masterXfer);
+
+	(!timeDateSel) ? (timeBack2Char(dataArray, rxBuffer)) : (dateBack2Char(dataArray, rxBuffer));
+
+	return statusValue;
+}
+
+void timeBack2Char (uint8_t *mainData, uint8_t *i2cData){
+	uint8_t seg = 0, min = 0, hr = 0;
+	seg = i2cData[0];
+	min = i2cData[1];
+	hr = i2cData[2];
+
+	mainData[0] = (hr / 10) + 48;
+	mainData[1] = (hr % 10) + 48;
+	mainData[2] = (uint8_t) ':';
+	mainData[3] = (min / 10) + 48;
+	mainData[4] = (min % 10) + 48;
+	mainData[5] = (uint8_t) ':';
+	seg &= 0x7F;
+	mainData[6] = (seg / 10) + 48;
+	mainData[7] = (seg % 10) + 48;
+}
+
+void dateBack2Char (uint8_t *mainData, uint8_t *i2cData){
+	uint8_t year = 0, month = 0, day = 0;
+	day = i2cData[0];
+	month = i2cData[1];
+	year = i2cData[2];
+
+	mainData[0] = (day / 10) + 48;
+	mainData[1] = (day % 10) + 48;
+	mainData[2] = (uint8_t) '/';
+	mainData[3] = (month / 10) + 48;
+	mainData[4] = (month % 10) + 48;
+	mainData[5] = (uint8_t) '/';
+	mainData[6] = (year / 10) + 48;
+	mainData[7] = (year % 10) + 48;
 }
 
 void transTime(const uint8_t *charData, uint8_t *i2cData) {
@@ -62,7 +122,7 @@ void transTime(const uint8_t *charData, uint8_t *i2cData) {
 			bcdMS = seg / 10;
 			seg = bcdMS << 4;
 			seg |= bcdLS;
-			seg |= (1 << 8);
+			seg |= 0x80;
 		} else {
 			seg = 0x80;
 		}
@@ -136,4 +196,5 @@ void transDate(const uint8_t *charData, uint8_t *i2cData) {
 	i2cData[1] = month;
 	i2cData[2] = year;
 }
+
 
